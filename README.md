@@ -1,69 +1,45 @@
-# 🚖 Uber India – Mumbai Data Analytics Project
+# Uber India Ride Analytics – July 2024
 
-This project analyses Uber ride data in **Mumbai** for **July 2024**. It uses **SQL**, **Excel**, and **Power BI** to transform raw booking data into actionable business insights. The project is modelled after a real-world Ola Data Analyst Case Study.
+One month of ride-hailing booking data for Bangalore, cleaned in SQL and Excel and analysed in Power BI. The questions were the ones an operations team would ask: when is demand highest, where is it, how many requests actually turn into rides, and which service tiers make the money.
 
----
+![Overview page](Overall.png)
 
-## 📊 Project Objective
+## About the data
 
-- Understand **how Uber operates** in a specific Indian city (Mumbai)
-- Explore demand trends, revenue patterns, ride outcomes, and user behaviour
-- Demonstrate a complete data pipeline: **Cleaning → Processing Visualisation**
+The dataset is modelled on the public Ola Bangalore case study, relabelled with Uber service tiers (Uber X, Uber XL, Comfort, Uber Black). Locations, volumes and outcomes describe Bangalore. It's a learning dataset, not Uber's data.
 
----
+- 40,534 booking requests, 1–31 July 2024, after dropping empty rows
+- 19 columns: timestamps, booking status, customer, vehicle type, pickup and drop location, wait times, cancellation reasons, fare, payment method, distance, ratings
+- Outcomes: Success, Canceled by Driver, Canceled by Customer, Driver Not Found
 
-## 🧰 Tools Used
+## The cleaning (this was most of the work)
 
-|    Tool    |                 Purpose                           |
-|------------|---------------------------------------------------|
-|   SQL      | Data cleaning, time/date conversion, aggregations |
-|   Excel    | Data inspection, cleanup, verification            |
-|   Power BI | Visual dashboards, KPIs, location & time analysis |
+- The raw sheet had roughly 62,000 blank rows under the data. Filtered on load.
+- Numeric columns used the text `No` as a placeholder for trips that never happened. Converted to `NULL` or `0` with `CASE` expressions depending on the column.
+- Date and time were separate columns. Combined into one timestamp so hour-of-day and day-of-week could be derived in SQL.
+- Location names were systematically corrupted in the source (`IndiraNogar`, `KammaNohalli`, `BaNoshankari`), which looks like a global find-and-replace on `na` that went wrong somewhere upstream. Standardised to the real neighbourhood names.
+- Hourly, daily and per-location counts were produced as SQL aggregations and fed to Power BI, which kept the model light.
 
----
+The queries are in `Uber.sql`.
 
-## 📁 Files Included
+## What the data shows
 
-- `Bookings.xlsx` – Raw Uber booking dataset (40,539 rows)
-- `Uber.sql` – SQL scripts for data cleaning and transformation
-- Uber 2024 Data India.ppix– Power BI file with dashboards
-- `Uber_Mumbai_Project_Report.pdf` – Detailed report explaining the entire project
-- `Readme.md` – GitHub readme (this file)
+- **62% of requests completed.** 18% were cancelled by the driver, 10% by the customer, 10% ended as Driver Not Found. The failures cluster in peak hours in outlying areas.
+- **Two demand peaks**, around 8 AM and 8–9 PM, on an otherwise flat ~1,300–1,400 requests a day.
+- **Pickups concentrate** in Indira Nagar, Banashankari, Ramamurthy Nagar and Kammanahalli, then BTM Layout, Cox Town, Sarjapur Road and Kengeri.
+- **Comfort earns the most** (₹3.3M on an average fare above ₹500) despite every tier having about a quarter of requests. Uber X averages ₹212 a trip.
+- **Cash and UPI** cover about 90% of completed trips.
 
----
+## Files
 
-## 🔍 Key Insights
+| File | What it is |
+|---|---|
+| `Bookings.xlsx` | Raw dataset |
+| `Uber.sql` | Cleaning and aggregation queries |
+| `Uber 2024 Data India.pbix` | Power BI report |
+| `Uber 2024 Report.pdf` | Full write-up |
+| `Overall.png`, `Cancellation.png`, `Revenue.png`, `Ratings.png`, `Vehicle Type.png` | Dashboard pages |
 
-- 🚨 **38% of bookings were not completed** (driver/customer cancellations or no driver found)
-- 🕗 **Peak ride requests at 8 AM & 9 PM**
-- 📍 **Top pickup areas**: Indira Nagar, Banashankari, Kammanahalli
-- 💰 **Uber Comfort** earned the most revenue (highest average fare per trip)
-- 💸 **Cash & UPI** dominate as preferred payment methods
+## If I extended it
 
----
-
-## 📈 Power BI Dashboard Preview
-
-![Overall](https://github.com/prathmeshgondkar/Uber-India-Mumbai-Data-Analytics-Project/blob/b9907e080db4f39f8f89a215290bdfd4d51db4f5/Overall.png)
-
----
-
-## 📘 Learnings
-
-- Real-world data is **messy** — handled `"No"` placeholders, merged date/time fields, fixed spelling inconsistencies
-- SQL helped in writing flexible, scalable transformations
-- Power BI helped uncover patterns in time, geography, and ride behaviour
-- Learned to tell stories using data, not just numbers!
-
----
-
-## 🚀 Author
-
-**Prathmesh Gondkar**  
-📫 [LinkedIn](https://www.linkedin.com/in/prathmeshgondkar)
-
----
-
-## 📎 License
-
-This project is open-source for learning purposes. Feel free to fork or adapt it for your portfolio!
+More months to see seasonality, external factors like weather and holidays, and a simple model for cancellation likelihood per request.
